@@ -42,7 +42,7 @@
 
 ```txt
 不想看的全文的直接按照这些做（正式版会变成一键启动）：
-SQUAD × DG-LAB 项目依赖python 3.11.9（记得安装并升级pip）和node js以及Pytorch还有CUDA，所以你必须先下载并配置好，依赖清单请查看requirements.txt这个文件，安装依赖的方式为在主目录新建bat文件并粘贴python -m pip install -r requirements.txt然后执行文件即可。
+SQUAD × DG-LAB 项目依赖python 3.11.9（记得安装并升级pip）和node js以及Pytorch还有CUDA，所以你必须先下载并配置好，依赖清单请查看requirements.txt这个文件，安装依赖的方式为在主目录新建bat文件并粘贴python -m pip install -r requirements.txt然后执行文件即可。并且你需要单独在这个文件夹SQUAD_DGLAB\official_v2\socket\v2\backend运行npm install.bat
 
 python -m pip install --upgrade pip
 上面是升级pip的指令
