@@ -1,9 +1,16 @@
+# ============================================================
+# SQUAD_DGLAB v0.2.0-alpha-safestop
+# ============================================================
+
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Logs
 *.log
+python_trigger/logs/
 
 # Virtual environments
 .venv/
@@ -15,29 +22,28 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
+._*
+__MACOSX/
 
 # Runtime generated files
-python_trigger/qrcode_latest.png
-qrcode_latest.png
+*.png
+!samples/**/*.png
 *.tmp
 *.local
 .env
 
-# Node dependencies
-#node_modules/
-#official_v2/**/node_modules/
-
-# Keep official_v2 source, but not installed dependencies
-!official_v2/
-
-# Keep model and samples as you requested
-!model/
-!samples/
-
-# Optional backups created during editing
+# Backups (we deleted .bak files but ignore future ones)
 *.bak
+*_backup.py
+dglab_sender_v0.2_backup.py
 
-# macOS metadata
-.DS_Store
-._*
-__MACOSX/
+# Node dependencies
+node_modules/
+official_v2/**/node_modules/
+
+# Samples (not pushed to repo, sent separately to tester)
+samples/
+
+# Keep model
+!model/
+!model/*.pt
