@@ -25,9 +25,11 @@ else:
 # 冷却时间配置（秒）
 # ============================================================
 COOLDOWN = {
-    "bleeding": 1.0,   # 流血持续触发，1秒一次
-    "incap":    5.0,   # 濒死只触发一次，冷却长一点
-    "death":    5.0,   # 死亡只触发一次
+    "bleeding": 1.0,
+    "incap": 5.0,
+    "death": 5.0,
+    "suppression_light": 1.5,
+    "suppression_heavy": 2.5,
 }
 
 
@@ -51,7 +53,7 @@ def root():
     return {
         "service": "python_trigger",
         "status": "running",
-        "step": "step-2-assembled",
+        "step": "v0.3-suppression-ready",
         "mode": "real_dglab" if USE_REAL_DGLAB else "mock",
         "dglab_real": USE_REAL_DGLAB,
     }
@@ -75,39 +77,42 @@ def dglab_status():
 # ============================================================
 @app.post("/trigger")
 def trigger(body: TriggerEvent):
-
     event_name = body.event.strip().lower()
 
-    # 第一步：检查冷却时间
-    cooldown = COOLDOWN.get(event_name, 0.5)
-    if not can_trigger(event_name, cooldown):
-        return {
-            "success": False,
-            "event": event_name,
-            "action": "blocked",
-            "message": f"冷却中，{cooldown}秒内只触发一次"
-        }
-
-    # 第二步：把事件翻译成动作
+    # 第一步：先把事件翻译成动作
+    # 先判断 unknown，再进入 cooldown，避免未知事件污染 cooldown 状态。
     action = map_event_to_action(event_name)
     if action == "unknown_action":
         return {
             "success": False,
             "event": event_name,
             "action": "unknown_action",
-            "message": f"不认识的事件：{event_name}"
+            "message": f"不认识的事件：{event_name}",
+        }
+
+    # 第二步：检查冷却时间
+    cooldown = COOLDOWN.get(event_name, 0.5)
+    if not can_trigger(event_name, cooldown):
+        return {
+            "success": False,
+            "event": event_name,
+            "action": "blocked",
+            "message": f"冷却中，{cooldown}秒内只触发一次",
         }
 
     # 第三步：调用发送器
-    result = send_action(action, payload={
-        "source": body.source,
-        "level": body.level,
-    })
+    result = send_action(
+        action,
+        payload={
+            "source": body.source,
+            "level": body.level,
+        },
+    )
 
     return {
         "success": result.get("success", False),
         "event": event_name,
         "action": action,
         "sender_result": result,
-        "message": "触发成功" if result.get("success", False) else "触发失败"
+        "message": "触发成功" if result.get("success", False) else "触发失败",
     }

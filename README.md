@@ -1,35 +1,38 @@
 # SQUAD × DG-LAB
 
-SQUAD × DG-LAB 是一个 Alpha 阶段的实验项目，用于将 SQUAD 游戏画面中的角色状态识别结果，通过本地 Python Trigger 服务转发到 DG-LAB SOCKET v2 通信层，实现基于视觉识别的外部设备反馈。
+SQUAD × DG-LAB 是一个把 SQUAD 游戏画面中的角色状态识别结果，通过本地 Python Trigger 服务转发到 DG-LAB SOCKET v2 通信层，实现基于视觉识别的外部设备反馈的项目。
 
-当前版本主要用于个人学习、实验和联调验证。
+v1.0.0 在 v0.2.0-alpha 基础上完成了一键安装、依赖体检、配置化强度调整等封装工作，核心事件（bleeding / incap / death / safe stop）已通过真机验证，可作为正式版本对外发布。
 
 ## 当前版本
 
 ```txt
-v0.2.0-alpha-safestop
+v1.0.0
 ```
+
+发布形式：
+
+- **A 版（源码 + 模型）​**：适合开发者、想魔改的用户。
+- **B 版（源码 + 依赖 + 模型）​**：解压即用，含预装的 venv 和 node_modules。
+
+DGHub 插件版将作为独立 release 在 v1.1 推出。
 
 ---
 
 ## 重要安全警告
 
-**本版本在 v0.1.0-alpha 基础上新增了「动作结束后自动归零」机制，但作者本人尚未在真实郊狼设备上完成验证。​**
-
-请务必完整阅读本节后再启动真实设备模式。
-
-**强烈建议先使用 Mock 模式完成完整链路测试，确认事件识别、Trigger 流转、WebSocket 配对都正常之后，再切换到真实设备模式。​**
-
 **真实设备模式下，必须在 DG-LAB APP 中手动设置通道强度上限。APP 端的上限是最后一道硬件级保护，软件层任何 bug 都不能突破这条线。​**
 
-**本项目中的 `type: 3` 指令用于将通道强度设置到指定值，不是一次性临时脉冲。这意味着「设置 → 不归零」会让设备一直保持该强度。v0.2 已经加入自动归零逻辑，但请仍然保留手动断开能力。​**
+**本项目中的 `type: 3` 指令用于将通道强度设置到指定值，不是一次性临时脉冲。这意味着「设置 → 不归零」会让设备一直保持该强度。v0.2 起加入了自动归零逻辑，v1.0 已通过真机验证 bleeding / incap / death 三个核心事件的完整归零流程，但请仍然保留手动断开能力。​**
+
+**强烈建议先使用 Mock 模式完成完整链路测试，确认事件识别、Trigger 流转、WebSocket 配对都正常之后，再切换到真实设备模式。​**
 
 **如果没有正确设置强度上限、没有确认设备状态、没有保留手动断开方式，请不要运行真实设备模式。​**
 
 ```
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 真实设备模式前必须设置强度上限，并从低强度开始测试。
-v0.2 的自动归零未经真机验证，请保持警惕。
+suppression 检测仍为 EXPERIMENTAL，默认关闭，请保持警惕。
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ```
 
@@ -52,7 +55,7 @@ v0.2 的自动归零未经真机验证，请保持警惕。
 重复触发
 网络延迟
 波形队列残留
-通道强度未自动归零（v0.2 已修复，但未经真机验证）
+通道强度未自动归零（核心事件已验证，suppression 仍未验证）
 设备连接异常
 使用者无法及时断开
 ```
@@ -61,41 +64,42 @@ v0.2 的自动归零未经真机验证，请保持警惕。
 
 ---
 
-## v0.2.0-alpha-safestop 改动摘要
+## v1.0.0 改动摘要
 
-本次版本相对 v0.1.0-alpha 的主要改动：
+本次版本相对 v0.2.0-alpha 的主要改动：
 
 **新功能**
 
 ```txt
-新增  start_all.bat 一键启动脚本（自动检测 npm install + Mock/Real 模式选择）
-新增  动作结束后自动归零（_stop_channel：clear 波形队列 + strength=0）
-新增  per-channel token 机制，防止旧 timer 误归零新动作
-新增  发送波形失败时立刻触发兜底归零
-调整  send_action 在 clientMsg 发送成功后调度 safe stop timer
+新增  install.bat 一键安装脚本（自动检测 CUDA、智能映射 PyTorch 版本、Python 版本校验）
+新增  check_deps.py 依赖体检脚本（5 节检查：Python / 依赖 / PyTorch+CUDA / OpenCV / 项目文件）
+新增  config.ini 强度配置文件，支持自定义 weak/strong/death/suppression 五档强度
+新增  start_all.bat 增加 suppression 模式三选一（off / blur / vignette）
+新增  start_all.bat 自动检测局域网 IPv4 列表供选择
+新增  suppression v1（blur，vanilla 适用）和 v2（vignette，modded 适用）两套检测器
+新增  KNOWN_ISSUES.md 已知问题文档
 ```
 
-**清理**
+**改进**
 
 ```txt
-删除  vision/ 下所有调试脚本，仅保留 realtime_detect_and_trigger.py
-删除  official_v2/ 下非 backend 内容（coyote、frontend、image、PawPrints）
-删除  samples/ 测试样本（不再随仓库分发）
-删除  start_mock.bat（Mock 模式已并入 start_all.bat）
+改进  npm install 流程并入 install.bat Step 5，自动复制 .env.example 为 .env
+改进  install.bat 使用 goto-based 结构，避免嵌套 if 块在 cmd 下的解析问题
+改进  ACTION_PROFILES 改为从 config.ini 读取，运行时无需改代码即可调强度
+改进  README 端口占用说明明确（18000 trigger / 9999 backend）
 ```
 
-详细改动可参考 `python_trigger/adapters/dglab_sender.py` 顶部注释。
-
-已通过的测试：
+**真机验证状态（v1.0.0）​**
 
 ```txt
-[OK] start_all.bat 双模式启动
-[OK] Mock 回归
-[OK] 真实模式下未绑定 (not_bound) 路径
-[OK] 真实模式 WS 连接 + 二维码生成 + APP 扫码配对
-[--] 真实设备单次触发归零            （等待设备到货）
-[--] 真实设备重叠事件 token 防误伤    （等待设备到货）
-[--] 真实设备跨事件中断              （等待设备到货）
+[OK] start_all.bat 双模式 + suppression 三模式启动
+[OK] Mock 模式完整回归
+[OK] 真实模式 WS 连接 + 二维码 + APP 扫码配对
+[OK] bleeding 单次触发完整归零（真机）
+[OK] incap 单次触发完整归零（真机）
+[OK] death 单次触发完整归零（真机）
+[OK] 重叠事件 token 防误伤（真机）
+[--] suppression v1/v2 真机验证（EXPERIMENTAL，载具场景已知盲区）
 ```
 
 ---
@@ -107,9 +111,13 @@ vision/             视觉识别层，负责截图、检测和状态判断
 python_trigger/    本地 Trigger 服务，负责接收识别事件并映射为动作
 official_v2/       DG-LAB SOCKET v2 官方后端服务（仅保留 backend）
 model/best.pt      YOLO 识别模型
-start_all.bat      一键启动脚本（v0.2 新增）
+install.bat        一键安装脚本（v1.0 新增）
+check_deps.py      依赖体检脚本（v1.0 新增）
+start_all.bat      一键启动脚本
+config.ini         强度配置（v1.0 新增）
 requirements.txt   Python 依赖清单
 PYTORCH_INSTALL.md PyTorch 安装指南（GPU 版必读）
+KNOWN_ISSUES.md    已知问题与限制
 ```
 
 测试样本 `samples/` 不随仓库分发，请向作者单独索取。
@@ -120,18 +128,47 @@ PYTORCH_INSTALL.md PyTorch 安装指南（GPU 版必读）
 
 ```txt
 Windows 10 / Windows 11
-Python 3.11.9
-Node.js（建议 LTS 版本）
-NVIDIA 显卡与可用 CUDA 环境
+Python 3.10 / 3.11 / 3.12（推荐 3.11.9）
+Node.js 16 或更高（推荐 LTS）
+NVIDIA 显卡（推荐 RTX 20/30/40 系列）+ 可用 CUDA 驱动
 DG-LAB APP
 DG-LAB 郊狼脉冲主机 3.0
 ```
+
+A 卡、Intel 集显、Mac 用户的限制请见 `KNOWN_ISSUES.md`。
 
 ---
 
 ## 安装步骤
 
-### 1. 安装 GPU 版 PyTorch
+### 推荐：一键安装
+
+在项目根目录双击：
+
+```txt
+install.bat
+```
+
+脚本会自动完成 6 个步骤：
+
+```txt
+Step 1/6  检查 Python 与 Node.js（含版本号校验）
+Step 2/6  升级 pip
+Step 3/6  检测 CUDA 并安装对应版本 PyTorch（cu126/cu124/cu121/cu118 智能映射）
+Step 4/6  安装 requirements.txt 其余依赖
+Step 5/6  安装 Node.js 后端依赖 + 自动复制 .env
+Step 6/6  调用 check_deps.py 体检
+```
+
+中途如检测不到 NVIDIA 显卡，脚本会弹出三选一菜单（默认退出，不会强制装 CPU 版）。
+
+CUDA 版本异常或解析失败时会兜底装 cu121，确保不会卡死。
+
+### 手动安装（备用）
+
+如果一键脚本失败，按以下顺序手动执行：
+
+#### 1. 安装 GPU 版 PyTorch
 
 PyTorch 必须单独安装 GPU 版，**不能**通过 `requirements.txt` 装，否则会被装成 CPU 版，YOLO 推理性能会下降 10 倍以上。
 
@@ -150,18 +187,18 @@ python -m pip install torch torchvision torchaudio --index-url https://download.
 
 其他 CUDA 版本请查阅 `PYTORCH_INSTALL.md`。
 
-### 2. 安装其余 Python 依赖
+#### 2. 安装其余 Python 依赖
 
-进入项目根目录，安装 `requirements.txt` 中列出的依赖：
+进入项目根目录：
 
 ```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB"
+cd /d "项目根目录"
 python -m pip install -r requirements.txt
 ```
 
 `requirements.txt` 中**不包含** torch/torchvision/torchaudio，不会覆盖刚装好的 GPU 版。
 
-主要包含：
+主要依赖：
 
 ```txt
 ultralytics          YOLOv8 推理
@@ -179,30 +216,39 @@ PyYAML               YOLO 数据集配置支持
 tqdm                 进度条工具
 ```
 
-### 3. Node.js 依赖
-
-`start_all.bat` 首次运行时会自动执行 `npm install`，无需手动操作。
-
-如果想手动安装：
+#### 3. Node.js 依赖
 
 ```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB\official_v2\socket\v2\backend"
+cd /d "项目根目录\official_v2\socket\v2\backend"
 npm install
+copy .env.example .env
 ```
+
+#### 4. 验证安装
+
+```bat
+cd /d "项目根目录"
+python check_deps.py
+```
+
+应看到 5 节检查全部通过：Python 版本 / 13 个依赖包 / PyTorch+CUDA / OpenCV 功能 / 项目文件完整性。
 
 ---
 
-## 基本运行流程
-
-本项目通常需要同时运行三个组件：
+## 端口占用一览
 
 ```txt
-1. DG-LAB SOCKET v2 后端       （端口 9999）
-2. Python Trigger 服务         （端口 18000）
-3. vision 视觉识别脚本         （独立进程）
+9999    DG-LAB SOCKET v2 后端（WebSocket）
+18000   Python Trigger 服务（FastAPI）
 ```
 
-v0.2 提供两种启动方式：**推荐使用一键启动**。
+启动前请确保这两个端口未被其他程序占用。如确需修改：
+
+```txt
+- 后端端口：编辑 official_v2\socket\v2\backend\.env 中的 PORT
+- Trigger 端口：修改 start_all.bat 中的 --port 参数
+注意：端口改动后两侧必须保持一致，否则 trigger 连不上后端。
+```
 
 ---
 
@@ -214,21 +260,31 @@ v0.2 提供两种启动方式：**推荐使用一键启动**。
 start_all.bat
 ```
 
-脚本会自动完成：
+脚本会引导你完成三轮选择：
 
 ```txt
-1. 检测 Node.js 依赖，未安装时自动跑 npm install
-2. 提示选择模式：
-     1 = Mock 模式（无设备测试）
-     2 = Real 模式（真实 DG-LAB）
-3. 选择 Real 模式时显示强度上限安全警告
-4. 弹出两个新 cmd 窗口：
-     - DGLAB Backend   （Node.js 后端）
-     - Trigger Service （Python uvicorn）
-5. 真实模式下自动弹出二维码图片，用 DG-LAB APP 扫码即可配对
+1. 发送器模式
+   1 = Mock  （无设备测试）
+   2 = Real  （真实 DG-LAB 设备）
+
+2. Suppression 模式（实验性，默认关闭）
+   1 = off       默认，推荐
+   2 = blur      vanilla SQUAD 用，EXPERIMENTAL
+   3 = vignette  modded SQUAD 用，EXPERIMENTAL
+
+3. 局域网 IP（仅 Real 模式）
+   脚本会自动列出本机所有 IPv4 地址，选一个让手机扫码访问
 ```
 
-**vision 视觉识别脚本不会被一键启动**，需要确认配对成功后手动启动（见下节）。
+选择完成后会自动启动三个服务窗口：
+
+```txt
+- DGLAB Backend     端口 9999
+- Trigger Service   端口 18000，含 DGLAB_REAL / DGLAB_LAN_IP / SQUAD_SUPPRESSION_MODE 环境变量
+- Vision Detector   YOLO 实时识别
+```
+
+Real 模式启动后会自动弹出二维码，用 DG-LAB APP 扫描即可配对。
 
 ---
 
@@ -237,7 +293,7 @@ start_all.bat
 ### 1. 启动 DG-LAB SOCKET v2 后端
 
 ```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB\official_v2\socket\v2\backend"
+cd /d "项目根目录\official_v2\socket\v2\backend"
 npm start
 ```
 
@@ -248,122 +304,83 @@ info: WebSocket 服务器启动，监听端口：9999
 info: 服务器启动完成
 ```
 
-也可直接双击 `start.bat`。
-
 ### 2. 设置局域网 IP（仅真实模式需要）
 
-真实设备扫码时，需要让手机访问电脑所在局域网 IP。
-
-不设置时默认使用：
-
-```txt
-192.168.1.100
-```
-
-查询本机 IP：
-
 ```bat
-ipconfig
-```
-
-设置环境变量：
-
-```bat
-set DGLAB_LAN_IP=192.168.x.x
+ipconfig                           查询本机 IP
+set DGLAB_LAN_IP=192.168.x.x       设置环境变量
 ```
 
 ### 3. 启动 Python Trigger 服务
 
-进入 `python_trigger` 目录：
-
 ```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB\python_trigger"
-```
+cd /d "项目根目录\python_trigger"
 
-Mock 模式：
-
-```bat
+REM Mock 模式
 set DGLAB_REAL=0
 uvicorn app:app --host 127.0.0.1 --port 18000
-```
 
-真实 DG-LAB 模式：
-
-```bat
+REM 真实 DG-LAB 模式
 set DGLAB_REAL=1
 uvicorn app:app --host 127.0.0.1 --port 18000
 ```
 
-真实模式启动成功后应看到类似输出（节选）：
+### 4. 启动 vision 视觉识别脚本
 
-```txt
-[APP] 当前模式：真实 DG-LAB 发送器 adapters.dglab_sender
-[DGLAB WS] 已连接到后端，等待 clientId 分配...
-[DGLAB WS] 收到 clientId：xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-[DGLAB WS] 二维码 URL：
-           https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://192.168.x.x:9999/xxxxxxxx-...
-INFO:     Uvicorn running on http://127.0.0.1:18000
-[DGLAB WS] 二维码图片已保存：...\qrcode_latest.png
-[DGLAB WS] 二维码图片已弹出，请用 DG-LAB APP 扫描
+```bat
+cd /d "项目根目录\vision"
+python realtime_detect_and_trigger.py
+```
+
+如需启用 suppression：
+
+```bat
+set SQUAD_SUPPRESSION_MODE=blur       vanilla 用
+set SQUAD_SUPPRESSION_MODE=vignette   modded 用
 ```
 
 ---
 
-## 4. 运行视觉识别脚本
+## 强度调整
 
-无论使用方式 A 还是方式 B，vision 都需要在 Backend + Trigger 都启动**之后**手动运行。
+v1.0 起所有强度参数都集中在项目根目录的 `config.ini`，无需改代码：
 
-回到项目根目录：
+```ini
+[ACTION_PROFILES]
+weak_pulse_strength = 10
+weak_pulse_duration = 2.0
 
-```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB"
+strong_pulse_strength = 20
+strong_pulse_duration = 4.0
+
+death_pulse_strength = 40
+death_pulse_duration = 5.0
+
+suppression_light_pulse_strength = 8
+suppression_light_pulse_duration = 1.5
+
+suppression_heavy_pulse_strength = 14
+suppression_heavy_pulse_duration = 2.0
 ```
 
-运行实时识别与触发脚本（**vision 层只保留这一个文件**，其他历史脚本已在 v0.2 清理）：
-
-```bat
-python vision\realtime_detect_and_trigger.py
-```
-
-脚本启动后会持续抓屏并把识别到的事件 POST 到 Trigger 服务。所有 vision 层配置项都内置在 `realtime_detect_and_trigger.py` 顶部，需要调整请直接编辑该文件。
+修改后**重启 trigger 服务**即可生效，无需重启后端或 vision。
 
 ---
 
 ## 测试 Trigger 接口
 
-如果没有 SQUAD 游戏画面，可以直接用 `tests/` 目录下的脚本向 Trigger 服务发送测试事件，验证整条链路。
-
-进入 `python_trigger` 目录：
+如果没有 SQUAD 游戏画面，可以直接用 `tests/` 目录下的脚本向 Trigger 服务发送测试事件：
 
 ```bat
-cd /d "E:\SQUAD_DGLAB\SQUAD_DGLAB\python_trigger"
-```
+cd /d "项目根目录\python_trigger"
 
-发送 bleeding 测试事件：
-
-```bat
 python tests\send_bleeding.py
-```
-
-发送 incap 测试事件：
-
-```bat
 python tests\send_incap.py
-```
-
-发送 death 测试事件：
-
-```bat
 python tests\send_death.py
-```
-
-发送 cooldown 测试事件：
-
-```bat
 python tests\send_cooldown_test.py
 ```
 
-**注意**：这些脚本只发 HTTP，最终是否真的电到设备取决于：
+注意：
 
 ```txt
 1. Mock 模式          → 永远不会真电，只在终端打印
@@ -393,12 +410,13 @@ SQUAD_DGLAB/
 │           │  └─ timer.js
 │           ├─ package.json
 │           ├─ package-lock.json
-│           ├─ README.md
-│           └─ start.bat
+│           ├─ .env.example
+│           ├─ npm install.txt
+│           └─ README.md
 │
 ├─ python_trigger/
 │  ├─ adapters/
-│  │  ├─ dglab_sender.py      ← v0.2 改造重点
+│  │  ├─ dglab_sender.py
 │  │  ├─ dglab_ws_client.py
 │  │  └─ mock_sender.py
 │  ├─ tests/
@@ -408,33 +426,34 @@ SQUAD_DGLAB/
 │  │  └─ send_incap.py
 │  ├─ app.py
 │  ├─ event_mapper.py
-│  └─ state.py
+│  ├─ state.py
+│  └─ config_loader.py
 │
 ├─ vision/
-│  └─ realtime_detect_and_trigger.py
+│  ├─ realtime_detect_and_trigger.py
+│  └─ suppression/
+│     ├─ __init__.py
+│     ├─ detector_v1_blur.py
+│     └─ detector_v2_vignette.py
 │
-├─ start_all.bat              ← v0.2 一键启动入口
+├─ install.bat              v1.0 新增
+├─ check_deps.py            v1.0 新增
+├─ start_all.bat
+├─ config.ini               v1.0 新增
 ├─ requirements.txt
 ├─ README.md
 ├─ PYTORCH_INSTALL.md
+├─ KNOWN_ISSUES.md          v1.0 新增
 └─ .gitignore
 ```
 
 ---
 
-## 重要配置说明
+## 重要环境变量说明
 
 ### DGLAB_LAN_IP
 
-用于生成 DG-LAB APP 扫码连接的二维码地址。
-
-不设置时默认：
-
-```txt
-192.168.1.100
-```
-
-实际使用请改为本机局域网 IP：
+用于生成 DG-LAB APP 扫码连接的二维码地址。`start_all.bat` 会自动列出本机 IPv4 让你选，无需手动设置。手动启动时：
 
 ```bat
 set DGLAB_LAN_IP=192.168.1.23
@@ -442,50 +461,45 @@ set DGLAB_LAN_IP=192.168.1.23
 
 ### DGLAB_REAL
 
-用于区分 Mock 模式和真实设备模式。
-
-Mock 模式：
+区分 Mock 模式和真实设备模式。`start_all.bat` 会根据用户输入自动设置。
 
 ```bat
-set DGLAB_REAL=0
+set DGLAB_REAL=0    Mock
+set DGLAB_REAL=1    Real
 ```
 
-真实模式：
+### SQUAD_SUPPRESSION_MODE
+
+启用压制效果检测（默认关闭）。`start_all.bat` 第二轮选择时会自动设置。
 
 ```bat
-set DGLAB_REAL=1
+set SQUAD_SUPPRESSION_MODE=off        默认
+set SQUAD_SUPPRESSION_MODE=blur       vanilla SQUAD
+set SQUAD_SUPPRESSION_MODE=vignette   modded SQUAD
 ```
-
-使用 `start_all.bat` 时，这个变量会根据用户输入自动设置，无需手动配置。
-
-建议先使用 Mock 模式完成测试，再切换到真实模式。
 
 ---
 
 ## 已知问题与限制
 
+详见 `KNOWN_ISSUES.md`。简要列举：
+
 ```txt
-1. 自动归零未经真机验证
-   v0.2 在 dglab_sender 中加入了 safe stop timer + per-channel token，
-   逻辑层与协议层均已 review，但因作者郊狼设备未到货，
-   尚未在真实硬件上验证「动作结束后强度是否真的归零」。
+1. suppression 检测为 EXPERIMENTAL，默认关闭，载具场景有已知盲区。
 
-2. ACTION_PROFILES 强度值为保守估算
-   dglab_sender.py 中 weak/strong/death 三档强度
-   (10 / 20 / 40) 为协议层估算值，可能偏低或偏高，
-   需要真机体验后调整。
+2. ACTION_PROFILES 默认强度（10/20/40）为保守估算，请通过 config.ini 调整。
 
-3. WS 断开重连后的 timer 残留
-   如果 WS 断开时正好有 safe stop timer 在飞，
-   timer 到期时 send 会失败，当前策略是只打日志、不重试。
-   理论上 APP 心跳超时会兜底，但未经真机验证。
+3. WS 断开重连后的 timer 残留：APP 心跳超时会兜底，但未在所有断网场景验证。
 
-4. vision 层 ROI 已回退到全屏检测
-   早期版本曾使用 ROI 裁剪加速识别，但发现会破坏 incap 识别，
-   v0.2 已回退到全屏 (DETECT_Y_START_RATIO = 0.00)。
+4. vision 层 ROI 已回退到全屏检测（早期 ROI 裁剪会破坏 incap 识别）。
 
-5. start_all.bat 仅支持 Windows
-   依赖 cmd 内置命令与 start 关键字，未提供 Linux/macOS 等价脚本。
+5. install.bat / start_all.bat 仅支持 Windows。
+
+6. A 卡、Intel 集显 Windows 用户只能用 Mock 模式（PyTorch CPU 版 YOLO 推理过慢）。
+
+7. Mac 暂不支持，需重写启动脚本和 mss 屏幕截图层。
+
+8. nvidia-smi 不在 PATH 时会被识别为非 N 卡，需手动加 PATH 或重装驱动。
 ```
 
 ---
@@ -498,7 +512,7 @@ set DGLAB_REAL=1
 
 真实模式下，请确保使用者完全知情并同意。运行过程中应始终保留手动断开设备或停止程序的能力。
 
-本项目当前为 Alpha 实验版本，可能存在识别误判、网络延迟、状态重复触发、设备连接异常等情况。建议优先使用 Mock 模式完成完整流程测试，再切换到真实设备模式。
+虽然 v1.0 已通过核心事件真机验证，但 suppression、断网恢复等场景仍存在未覆盖的边界情况。建议优先使用 Mock 模式完成完整流程测试，再切换到真实设备模式。
 
 ---
 
@@ -520,4 +534,15 @@ set DGLAB_REAL=1
 https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE
 ```
 
-本项目中的模型文件、测试脚本仅用于本项目 Alpha 阶段的实验验证。
+本项目中的模型文件、测试脚本仅用于本项目的实验验证。
+
+---
+
+## 后续版本规划
+
+```txt
+v1.1   DGHub 插件版（独立 release，重写 main.py 适配层，
+       使用 trigger op 而非 /trigger POST，强度由主程序 UI 自动管理）
+v1.x   suppression v3 优化载具场景识别
+v1.x   Linux/Mac 启动脚本支持
+```

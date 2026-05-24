@@ -25,13 +25,47 @@ from typing import Optional
 # ------------------------------------------------------------
 # 动作参数表
 # 必须与 dglab_sender.py 的 ACTION_PROFILES 保持一致
-# 这样 mock 阶段就能验证"动作名是否合法"，不会到设备阶段才发现笔误
+# 现在两边都从 config.ini 读取,自动保持一致
 # ------------------------------------------------------------
+from config_loader import get_action_config
+
+_strength_cfg, _duration_cfg = get_action_config()
+
 ACTION_PROFILES = {
-    "weak_pulse":   {"channel": "A", "strength": 30, "duration": 2, "description": "流血反馈"},
-    "strong_pulse": {"channel": "A", "strength": 60, "duration": 4, "description": "濒死反馈"},
-    "death_pulse":  {"channel": "A", "strength": 80, "duration": 5, "description": "死亡反馈"},
+    "weak_pulse": {
+        "channel": "A",
+        "strength": _strength_cfg["weak_pulse"],
+        "duration": _duration_cfg["weak_pulse"],
+        "description": "流血反馈",
+    },
+    "strong_pulse": {
+        "channel": "A",
+        "strength": _strength_cfg["strong_pulse"],
+        "duration": _duration_cfg["strong_pulse"],
+        "description": "濒死反馈",
+    },
+    "death_pulse": {
+        "channel": "A",
+        "strength": _strength_cfg["death_pulse"],
+        "duration": _duration_cfg["death_pulse"],
+        "description": "死亡反馈",
+    },
+    "suppression_light_pulse": {
+        "channel": "A",
+        "strength": _strength_cfg["suppression_light_pulse"],
+        "duration": _duration_cfg["suppression_light_pulse"],
+        "description": "压制轻反馈",
+    },
+    "suppression_heavy_pulse": {
+        "channel": "A",
+        "strength": _strength_cfg["suppression_heavy_pulse"],
+        "duration": _duration_cfg["suppression_heavy_pulse"],
+        "description": "压制强反馈",
+    },
 }
+
+
+
 
 
 # ------------------------------------------------------------
