@@ -1,0 +1,21 @@
+# Windows 批处理:按二进制处理,git 不动任何字节(保住 GBK + CRLF)
+*.bat binary
+*.cmd binary
+
+# 文本文件:统一 LF
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.ini text eol=lf
+
+# 二进制
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pt binary
+*.onnx binary
+*.zip binary
+*.exe binary
