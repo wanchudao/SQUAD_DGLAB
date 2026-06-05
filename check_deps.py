@@ -11,11 +11,13 @@ SQUAD x DG-LAB v1.0.0 依赖与项目完整性检查
     4. OpenCV 功能性测试
     5. 项目关键文件完整性
     6. 端口可用性检查 (9999 / 18000)
+    7. config.ini 配置校验
 """
 
 from __future__ import annotations
 import sys
 import importlib
+import configparser
 from pathlib import Path
 
 # ANSI 颜色 (Windows 10+ cmd 默认支持)
@@ -275,6 +277,67 @@ def check_ports() -> bool:
 
 
 # ============================================================
+# 7. config.ini 配置校验
+# ============================================================
+EXPECTED_KEYS = {
+    "strength": ["weak_pulse", "strong_pulse", "death_pulse",
+                 "suppression_light_pulse", "suppression_heavy_pulse"],
+    "duration": ["weak_pulse", "strong_pulse", "death_pulse",
+                 "suppression_light_pulse", "suppression_heavy_pulse"],
+}
+
+def check_config() -> bool:
+    section("7. config.ini 配置校验")
+    root = Path(__file__).parent
+    config_path = root / "config.ini"
+
+    if not config_path.exists():
+        warn("config.ini 不存在, 将使用默认值")
+        return True
+
+    cp = configparser.ConfigParser()
+    try:
+        cp.read(config_path, encoding="utf-8")
+    except Exception as e:
+        fail(f"config.ini 编码或格式错误: {e}")
+        return False
+
+    all_ok = True
+
+    for sec, keys in EXPECTED_KEYS.items():
+        if not cp.has_section(sec):
+            warn(f"缺少 [{sec}] 节, 该节将使用默认值")
+            all_ok = False
+            continue
+        for key in keys:
+            if not cp.has_option(sec, key):
+                warn(f"[{sec}] 缺少键 {key}, 将使用默认值")
+                all_ok = False
+                continue
+            raw = cp.get(sec, key).strip()
+            try:
+                val = float(raw)
+                if sec == "strength":
+                    if val != int(val):
+                        warn(f"[{sec}] {key} = {raw} 不是整数, 将被截断")
+                    if val < 0 or val > 200:
+                        warn(f"[{sec}] {key} = {raw} 越界 (0~200), 将被 clamp")
+                else:
+                    if val < 0.1 or val > 30.0:
+                        warn(f"[{sec}] {key} = {raw} 越界 (0.1~30.0), 将被 clamp")
+            except ValueError:
+                warn(f"[{sec}] {key} = '{raw}' 不是数字, 将使用默认值")
+                all_ok = False
+
+    if all_ok:
+        ok("config.ini 格式正确, 所有字段有效")
+    else:
+        warn("config.ini 有问题, 见上方 [WARN] 说明 (不影响启动, 缺失项会用默认值)")
+
+    return all_ok
+
+
+# ============================================================
 # Main
 # ============================================================
 def main() -> int:
@@ -289,6 +352,7 @@ def main() -> int:
     cv_ok = check_opencv()
     must_passed, must_total, opt_passed = check_files()
     ports_ok = check_ports()
+    config_ok = check_config()
 
     section("总结")
 
@@ -328,6 +392,11 @@ def main() -> int:
         ok("端口 9999 / 18000 可用")
     else:
         warn("端口 9999 / 18000 有冲突, 启动前请用 netstat -ano 排查")
+
+    if config_ok:
+        ok("config.ini 配置校验通过")
+    else:
+        warn("config.ini 有问题, 见上文 (不影响启动)")
 
     print()
     if all_ok:

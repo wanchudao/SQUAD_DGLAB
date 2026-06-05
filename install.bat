@@ -25,8 +25,9 @@ REM Step 1/6: ��� Python (���汾��У��)
 REM ============================================================
 echo [Step 1/6] ��� Python...
 python --version >nul 2>&1
-if errorlevel 1 goto :no_python
+if errorlevel 1 goto :find_python
 
+:check_py_ver
 for /f "tokens=*" %%v in ('python --version 2^>^&1') do echo [OK] %%v
 
 REM ------------------------------------------------------------
@@ -89,8 +90,48 @@ echo         https://www.python.org/downloads/
 echo.
 echo [INFO] Opening Python download page...
 start https://www.python.org/downloads/
+echo.
+echo [INFO] Already installed Python but not found?
+echo        Re-run installer and check "Add to PATH"
+echo        Then restart this script.
 pause
 exit /b 1
+
+:find_python
+echo [INFO] Python not on PATH, searching...
+py -3 --version >nul 2>&1
+if not errorlevel 1 (
+    for /f "tokens=*" %%p in ('py -3 -c "import sys; print(sys.executable)"') do set "FULL_PY=%%p"
+    if exist "!FULL_PY!" (
+        for %%f in ("!FULL_PY!") do set "PY_DIR=%%~dpf"
+        set "PATH=!PY_DIR!;!PATH!"
+        echo [OK] Found Python via py launcher at !PY_DIR!
+        goto :check_py_ver
+    )
+)
+for /d %%d in ("%LOCALAPPDATA%\Programs\Python\Python3*") do (
+    if exist "%%d\python.exe" (
+        set "PATH=%%d;!PATH!"
+        echo [OK] Found Python at %%d
+        goto :check_py_ver
+    )
+)
+for /d %%d in ("C:\Python3*") do (
+    if exist "%%d\python.exe" (
+        set "PATH=%%d;!PATH!"
+        echo [OK] Found Python at %%d
+        goto :check_py_ver
+    )
+)
+for /d %%d in ("%ProgramFiles%\Python3*") do (
+    if exist "%%d\python.exe" (
+        set "PATH=%%d;!PATH!"
+        echo [OK] Found Python at %%d
+        goto :check_py_ver
+    )
+)
+echo [INFO] Could not find Python automatically
+goto :no_python
 
 :step1_node
 REM ------------------------------------------------------------
