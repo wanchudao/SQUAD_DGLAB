@@ -378,3 +378,33 @@ SQUAD_DGLAB_portable/        1.3 GB (预估 zip ~450 MB)
 - `vision/suppression/` 全部
 - `official_v2/` 全部
 - `config.ini`、`requirements.txt`
+
+---
+
+### GBK 编码事故（2026-06-05 同日）
+
+**现象**: 用户测试 install.bat 时发现所有中文变成乱码（锟斤拷），开头报 `'拷锟?GBK' 不是内部或外部命令`。
+
+**根因**: `install.bat` 原本是 GBK/ANSI 编码（v3.1 规范：不用 UTF-8，中文 Windows 兼容）。Edit 工具读写文件时默认为 UTF-8，导致 GBK 字节被当成 Latin-1 解码后重新编码为 UTF-8，中文全部损毁。
+
+**影响范围**: 仅 `install.bat`。`check_deps.py`、`start_all.bat` 等文件本身是 UTF-8/ASCII，不受影响。GitHub release v1.0.2 的 install.bat 有乱码。
+
+**修复过程**:
+1. 从 git 历史恢复原始 GBK 文件 (`ff0c597`)
+2. 编写 Python 脚本，以 `decode('gbk')` → Unicode → 应用纯 ASCII 文本替换 → `encode('gbk')` 写回
+3. 7 处编辑全部成功，文件从 11,954 字节 → 13,146 字节（新增内容均为 ASCII）
+4. 提交、推送、强制更新 v1.0.2 tag (`43a4b89`)
+
+**教训**:
+- **用 Edit/Write 工具修改 GBK 文件有编码风险**。工具不会自动检测 GBK，会按 UTF-8 处理导致多字节字符被破��。
+- **安全方案**: 对于 GBK 编码文件，先 `git checkout` 恢复原始版本，用 Python 脚本 `decode('gbk')` → 修改 → `encode('gbk')` 写回。
+- **可防御的编码模式**: 如果新增内容全部为 ASCII（英文日志标签 `[ERROR]`/`[WARN]`/`[INFO]`），则新增内容在 GBK 和 UTF-8 下字节一致，不会产生混合编码。本次 `install.bat` 的所有编辑恰好符合这个条件。
+- **验证方法**: 用 Python `open(f, 'rb').read().decode('gbk')` 验证文件仍为合法 GBK；检查中文是否可读。
+
+---
+
+### 发布
+
+- **v1.0.2** tag 创建于 `1a56d88`，后因 GBK 修复强制更新至 `43a4b89`
+- Release notes: https://github.com/wanchudao/SQUAD_DGLAB/releases/tag/v1.0.2
+- 分支策略: `ai-setup-test` → `main`，后续直接在 `main` 上工作
