@@ -257,3 +257,124 @@ SQUAD_DGLAB_portable/        1.3 GB (预估 zip ~450 MB)
 ### 涉及的现有文件
 - **未修改任何现有文件**。所有改动仅限于 `dist/` 目录下的新增文件。
 - `install.bat`、`start_all.bat`、`check_deps.py` 全部原样保留，供开发者和 A 版用户使用。
+
+---
+
+# AI 工作记录
+
+## 2026-06-05 — 发布前防御性改进（方向 C）
+
+**模型**: deepseek-v4-pro
+**分支**: ai-setup-test → main
+
+---
+
+### 背景
+
+用户即将为 v1.0.1 制作宣传片，项目已经发布在 GitHub 上。我们分析了用户（小白）从下载到跑起来的完整依赖链，识别出 8 道 "关卡"：
+
+| 关卡 | 依赖 | 用户可能遇到的问题 |
+|------|------|-------------------|
+| 1 | Python 3.10-3.12 | 没装、装了没加 PATH、版本太新 |
+| 2 | pip + requirements.txt | 下载超时（PyTorch ~3GB） |
+| 3 | NVIDIA 驱动 + CUDA | 不是 N 卡、驱动太旧 |
+| 4 | Node.js | 没装（Mock 模式可跳过） |
+| 5 | npm install | npm 官方源超时 |
+| 6 | 端口 9999/18000 | 被其他程序占用 |
+| 7 | 手机 + 局域网 | 不在同一网络、APP 强度上限没设 |
+| 8 | 游戏内交互 | 预期偏差 |
+
+核心结论：install.bat 的能力边界内不可能替用户装 Python、装驱动、修网络。**方向 C**——在边界处加防御，让用户遇到问题时能自愈或带有效信息报 bug。
+
+---
+
+### 改动清单：解决 9 个具体用户问题
+
+#### 问题 1: 用户不知道报什么 bug → 无从下手
+
+- **新增** `.github/ISSUE_TEMPLATE/install-failed.yml` — 安装失败表单（卡在哪步、Windows 版本、显卡、Python 版本）
+- **新增** `.github/ISSUE_TEMPLATE/startup-failed.yml` — 启动失败表单（哪个窗口报错、错误信息、是否跑过 install）
+- **新增** `.github/ISSUE_TEMPLATE/pairing-failed.yml` — 配对失败表单（扫码问题、网络、APP 强度设置）
+- **解决的痛点**: 用户报 "闪退"、"连不上" 时没有结构化信息，没法排查
+
+#### 问题 2: Python 没装 → install.bat 直接退，用户不知道去哪下
+
+- **修改** `install.bat` `:no_python` — 自动用 `start` 打开 Python 下载页，再退出
+- **解决的痛点**: 不再需要用户手动搜 "python download"
+
+#### 问题 3: Python 装了但没勾 "Add to PATH" → 报 "没找到 Python"
+
+- **修改** `install.bat` `:find_python` — 新增自动搜索逻辑：
+  1. 尝试 `py -3` 启动器（python.org 安装器自带），通过 `sys.executable` 定位完整路径
+  2. 扫描 `%LOCALAPPDATA%\Programs\Python\Python3*`
+  3. 扫描 `C:\Python3*`
+  4. 扫描 `%ProgramFiles%\Python3*`
+  5. 任意找到 → 自动加入 PATH → 继续安装
+  6. 全没找到 → 增强提示（"装了但没找到？重跑安装器勾选 Add to PATH"）
+- **解决的痛点**: 这是小白最高频问题——Python 装了，但 cmd 里敲 `python` 无效
+
+#### 问题 4: Node.js 没装 → 用户不知道去哪下
+
+- **修改** `install.bat` `:no_node` — 自动用 `start` 打开 Node.js 下载页
+- **解决的痛点**: 同上，减少用户搜索成本
+
+#### 问题 5: PyTorch ~3GB 下载超时 → 安装失败
+
+- **修改** `install.bat` `:step3_install` — `--default-timeout 120` + 失败后自动重试一次
+- **解决的痛点**: 国内用户直连 PyTorch 官方源下载 3GB 大概率 timeout
+
+#### 问题 6: npm install 官方源超时 → 安装失败
+
+- **修改** `install.bat` `:npm_failed` — 首次失败自动 `npm config set registry https://registry.npmmirror.com` 重试
+- **解决的痛点**: npm 官方源在国内经常超时
+
+#### 问题 7: 端口被占 → 启动后窗口闪退，不知道原因
+
+- **修改** `check_deps.py` — 新增第 6 节 `check_ports()`，检查 9999 (Node 后端) 和 18000 (Trigger) 是否被占用
+- **解决的痛点**: 上次没关干净或别的程序占了端口，启动失败但不知道原因
+
+#### 问题 8: 没装 GPU 驱动 → Vision 用 CPU 跑 YOLO，用户以为 "卡住了"
+
+- **修改** `start_all.bat` — Vision 启动前跑 `python -c "import torch; assert torch.cuda.is_available()"` 预检
+  - CUDA 不可用 → 打印醒目标语 "YOLO will be much slower on CPU"，但不阻塞启动
+- **解决的痛点**: CPU 模式 FPS 很低，用户以为程序坏了
+
+#### 问题 9: 编辑 config.ini 写错格式 → 配置被静默忽略，用户不知道
+
+- **修改** `check_deps.py` — 新增第 7 节 `check_config()`，逐项校验：
+  - `[strength]` / `[duration]` 节是否存在
+  - 5 个 key 是否齐全
+  - 值是否为合法数字
+  - 值是否在安全范围内 (0-200 / 0.1-30.0)
+  - 任意问题 → WARN，不影响启动（容错由 config_loader.py 的 fallback 机制兜底）
+- **解决的痛点**: 用户改完配置以为生效了，实际用的默认值，体感不对
+
+---
+
+### 附带修复
+
+- `check_deps.py` — 修复 `check_files()` 返回值 bug (`opt_passed + opt_total - opt_total + opt_passed` → `opt_passed`)
+- `vision/realtime_detect_and_trigger.py` — 帧间隔改为 `time.sleep(max(0.0, FRAME_INTERVAL - elapsed))`，补偿处理耗时
+- `README.md` — 修正配置格式文档（`[ACTION_PROFILES]` → `[strength]` + `[duration]`）
+- `check_deps.py` — 末尾加 `input("Press Enter to exit...")`，双击运行时窗口不会闪退
+
+---
+
+### 涉及文件
+
+| 文件 | 改动类型 |
+|------|----------|
+| `.github/ISSUE_TEMPLATE/install-failed.yml` | 新建 |
+| `.github/ISSUE_TEMPLATE/startup-failed.yml` | 新建 |
+| `.github/ISSUE_TEMPLATE/pairing-failed.yml` | 新建 |
+| `install.bat` | 修改（7 处防御性增强） |
+| `start_all.bat` | 修改（CUDA 预检） |
+| `check_deps.py` | 修改（端口检测、配置校验、pause、bug 修复） |
+| `vision/realtime_detect_and_trigger.py` | 修改（帧间隔补偿） |
+| `README.md` | 修改（配置文档修正） |
+
+### 未修改的文件
+- `python_trigger/` 全部
+- `vision/suppression/` 全部
+- `official_v2/` 全部
+- `config.ini`、`requirements.txt`
