@@ -403,7 +403,6 @@ def main() -> int:
         print(f"{GREEN}{'=' * 60}{RESET}")
         print(f"{GREEN}  全部检查通过! 可以双击 start_all.bat 启动{RESET}")
         print(f"{GREEN}{'=' * 60}{RESET}")
-        return 0
     else:
         print(f"{RED}{'=' * 60}{RESET}")
         print(f"{RED}  有问题需要解决, 见上文 [FAIL] 标记{RESET}")
@@ -413,7 +412,9 @@ def main() -> int:
         print("  - 依赖缺失: 重新跑 install.bat")
         print("  - PyTorch 问题: 见 PYTORCH_INSTALL.md")
         print("  - 文件缺失: 检查解压是否完整, 或重新下载发布包")
-        return 1
+    print()
+    input("Press Enter to exit...")
+    return 0 if all_ok else 1
 
 if __name__ == "__main__":
     sys.exit(main())
