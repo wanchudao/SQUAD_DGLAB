@@ -143,6 +143,17 @@ start "Trigger Service" cmd /k "cd /d %TRIGGER% && uvicorn app:app --host 127.0.
 
 timeout /t 4 /nobreak > nul
 
+echo [3/3] Checking CUDA before Vision...
+python -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo ============================================
+    echo [WARN] CUDA not available - Vision will fall back to CPU
+    echo        YOLO inference will be much slower on CPU
+    echo        Check PYTORCH_INSTALL.md if you expected GPU
+    echo ============================================
+    echo.
+)
 echo [3/3] Starting Vision (SQUAD_SUPPRESSION_MODE=%SQUAD_SUPPRESSION_MODE%)...
 start "Vision Detector" cmd /k "cd /d %VISION% && python realtime_detect_and_trigger.py"
 

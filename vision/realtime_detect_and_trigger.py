@@ -789,7 +789,8 @@ def main():
                         stop_event.set()
                         break
 
-                time.sleep(FRAME_INTERVAL)
+                elapsed = time.time() - start_time
+                time.sleep(max(0.0, FRAME_INTERVAL - elapsed))
 
     except KeyboardInterrupt:
         print()

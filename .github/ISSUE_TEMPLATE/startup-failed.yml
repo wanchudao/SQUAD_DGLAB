@@ -1,0 +1,57 @@
+name: "启动失败"
+description: "start_all.bat 启动后某个窗口报错、闪退、或服务无响应"
+labels: ["startup", "triage"]
+body:
+  - type: dropdown
+    id: which_window
+    attributes:
+      label: "哪个窗口出了问题"
+      options:
+        - "DGLAB Backend - 报错"
+        - "DGLAB Backend - 闪退"
+        - "Trigger Service - 报错"
+        - "Trigger Service - 闪退"
+        - "Vision Detector - 报错"
+        - "Vision Detector - 闪退"
+        - "全部闪退"
+        - "不确定"
+    validations:
+      required: true
+  - type: textarea
+    id: error_message
+    attributes:
+      label: "错误信息"
+      description: "截图或复制窗口里的错误文字"
+      placeholder: "粘贴错误信息..."
+    validations:
+      required: true
+  - type: dropdown
+    id: ran_install
+    attributes:
+      label: "之前跑过 install.bat 吗，是否全部通过"
+      options:
+        - "跑过，全部通过"
+        - "跑过，有部分失败但忽略了"
+        - "没跑过"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: "你选的什么模式"
+      options:
+        - "Mock + suppression off"
+        - "Mock + suppression blur/vignette"
+        - "Real + suppression off"
+        - "Real + suppression blur/vignette"
+        - "不记得了"
+    validations:
+      required: true
+  - type: input
+    id: port_check
+    attributes:
+      label: "端口 9999 和 18000 是否被占用"
+      description: "打开 cmd 执行 netstat -ano | findstr \"9999 18000\"，有结果就是被占用"
+      placeholder: "有空就填，不确定就写“不确定”"
+    validations:
+      required: false

@@ -1,0 +1,51 @@
+name: "设备配对失败"
+description: "APP 扫码后连不上、未配对、设备无反应"
+labels: ["pairing", "triage"]
+body:
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: "具体是什么问题"
+      options:
+        - "二维码弹不出来"
+        - "二维码出来了但 APP 扫了没反应"
+        - "显示配对成功但设备没感觉"
+        - "配对后过一会就断了"
+        - "报 not_bound 错误"
+        - "报 device_offline 错误"
+        - "其他"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: "你选的是什么模式"
+      options:
+        - "Mock - 本来就不会接设备"
+        - "Real"
+    validations:
+      required: true
+  - type: input
+    id: phone_ip
+    attributes:
+      label: "手机和电脑是否在同一局域网"
+      description: "连的同一个 WiFi？电脑开的热点？"
+      placeholder: "同一个 WiFi / 电脑开热点 / 不确定"
+    validations:
+      required: true
+  - type: input
+    id: app_strength
+    attributes:
+      label: "DG-LAB APP 里的通道强度上限设置了多少"
+      description: "比如 A=30, B=30"
+      placeholder: "如果没设置，请写“没设置”"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "后端日志"
+      description: "看看 official_v2/socket/v2/backend/logs/combined.log 最后 20 行"
+      placeholder: "粘贴日志..."
+    validations:
+      required: false

@@ -10,6 +10,7 @@ SQUAD x DG-LAB v1.0.0 依赖与项目完整性检查
     3. PyTorch + CUDA 可用性
     4. OpenCV 功能性测试
     5. 项目关键文件完整性
+    6. 端口可用性检查 (9999 / 18000)
 """
 
 from __future__ import annotations
@@ -226,7 +227,52 @@ def check_files() -> tuple[int, int, int]:
                 fail(f"[MUST] {rel:55s}  缺失! ({desc})")
             else:
                 warn(f"[OPT ] {rel:55s}  缺失  ({desc})")
-    return must_passed, must_total, opt_passed + opt_total - opt_total + opt_passed  # opt_passed
+    return must_passed, must_total, opt_passed
+
+
+# ============================================================
+# 6. 端口可用性检查
+# ============================================================
+def check_ports() -> bool:
+    section("6. 端口可用性检查")
+
+    import socket
+
+    ports = [
+        (9999, "DG-LAB SOCKET v2 后端"),
+        (18000, "Python Trigger 服务"),
+    ]
+
+    all_ok = True
+
+    for port, desc in ports:
+        sock = None
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex(("127.0.0.1", port))
+            if result == 0:
+                warn(f"端口 {port} 已被占用 ({desc})")
+                all_ok = False
+            else:
+                ok(f"端口 {port} 可用 ({desc})")
+        except Exception as e:
+            warn(f"端口 {port} 检测失败: {e}")
+            all_ok = False
+        finally:
+            if sock:
+                try:
+                    sock.close()
+                except Exception:
+                    pass
+
+    if all_ok:
+        ok("所有端口可用，启动不会冲突")
+    else:
+        warn("有端口被占用，启动前请用 netstat -ano 排查")
+
+    return all_ok
+
 
 # ============================================================
 # Main
@@ -242,6 +288,7 @@ def main() -> int:
     torch_ok = check_pytorch()
     cv_ok = check_opencv()
     must_passed, must_total, opt_passed = check_files()
+    ports_ok = check_ports()
 
     section("总结")
 
@@ -276,6 +323,11 @@ def main() -> int:
     else:
         fail(f"必需文件 {must_passed}/{must_total}, 有 {must_total - must_passed} 个缺失")
         all_ok = False
+
+    if ports_ok:
+        ok("端口 9999 / 18000 可用")
+    else:
+        warn("端口 9999 / 18000 有冲突, 启动前请用 netstat -ano 排查")
 
     print()
     if all_ok:

@@ -346,21 +346,19 @@ set SQUAD_SUPPRESSION_MODE=vignette   modded 用
 v1.0 起所有强度参数都集中在项目根目录的 `config.ini`，无需改代码：
 
 ```ini
-[ACTION_PROFILES]
-weak_pulse_strength = 10
-weak_pulse_duration = 2.0
+[strength]
+weak_pulse = 10
+strong_pulse = 20
+death_pulse = 40
+suppression_light_pulse = 8
+suppression_heavy_pulse = 14
 
-strong_pulse_strength = 20
-strong_pulse_duration = 4.0
-
-death_pulse_strength = 40
-death_pulse_duration = 5.0
-
-suppression_light_pulse_strength = 8
-suppression_light_pulse_duration = 1.5
-
-suppression_heavy_pulse_strength = 14
-suppression_heavy_pulse_duration = 2.0
+[duration]
+weak_pulse = 2.0
+strong_pulse = 4.0
+death_pulse = 5.0
+suppression_light_pulse = 1.5
+suppression_heavy_pulse = 2.0
 ```
 
 修改后**重启 trigger 服务**即可生效，无需重启后端或 vision。
