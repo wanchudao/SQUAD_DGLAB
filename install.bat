@@ -2,28 +2,28 @@
 setlocal enabledelayedexpansion
 
 REM ============================================================
-REM SQUAD x DG-LAB v1.0.0 Ò»ï¿½ï¿½ï¿½ï¿½×°ï¿½Å±ï¿½ (v3.1)
+REM SQUAD x DG-LAB v1.0.0 Ò»¼ü°²×°½Å±¾ (v3.1)
 REM
-REM ï¿½ï¿½ï¿½Ô­ï¿½ï¿½:
-REM   - ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ if (...) ï¿½ï¿½ï¿½Ð¿ï¿½, È«ï¿½ï¿½ï¿½Ä³ï¿½ if ... goto :label
-REM   - Ã¿ï¿½ï¿½ï¿½ï¿½ [DEBUG] ï¿½ï¿½ï¿½, ï¿½ï¿½×¡ï¿½Ü¶ï¿½Î»
-REM   - Ê§ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½Ë³ï¿½ (ï¿½ï¿½ï¿½ï¿½ npm install ï¿½ï¿½ WARN)
+REM Éè¼ÆÔ­Ôò:
+REM   - ²»ÓÃÇ¶Ì× if (...) ¶àÐÐ¿é, È«²¿¸Ä³É if ... goto :label
+REM   - Ã¿²½¼Ó [DEBUG] Êä³ö, ¿¨×¡ÄÜ¶¨Î»
+REM   - Ê§°ÜÄ¬ÈÏÍË³ö (³ýÁË npm install ÊÇ WARN)
 REM
-REM v3.1 ï¿½ï¿½ï¿½:
-REM   - É¾ï¿½ï¿½ chcp 65001, ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ GBK/ANSI ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-REM   - ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ GBK / ANSI ï¿½ï¿½ï¿½ë±£ï¿½ï¿½, ï¿½ï¿½Òªï¿½ï¿½ UTF-8
+REM v3.1 ±ä¸ü:
+REM   - É¾³ý chcp 65001, ÎÄ¼þ¸ÄÓÃ GBK/ANSI ±àÂë±ÜÃâÂÒÂë
+REM   - ÎÄ¼þ±ØÐëÒÔ GBK / ANSI ±àÂë±£´æ, ²»ÒªÓÃ UTF-8
 REM ============================================================
 
 echo.
 echo ============================================================
-echo   SQUAD x DG-LAB v1.0.0 - Ò»ï¿½ï¿½ï¿½ï¿½×°
+echo   SQUAD x DG-LAB v1.0.0 - Ò»¼ü°²×°
 echo ============================================================
 echo.
 
 REM ============================================================
-REM Step 1/6: ï¿½ï¿½ï¿½ Python (ï¿½ï¿½ï¿½æ±¾ï¿½ï¿½Ð£ï¿½ï¿½)
+REM Step 1/6: ¼ì²é Python (º¬°æ±¾ºÅÐ£Ñé)
 REM ============================================================
-echo [Step 1/6] ï¿½ï¿½ï¿½ Python...
+echo [Step 1/6] ¼ì²é Python...
 python --version >nul 2>&1
 if errorlevel 1 goto :find_python
 
@@ -31,9 +31,9 @@ if errorlevel 1 goto :find_python
 for /f "tokens=*" %%v in ('python --version 2^>^&1') do echo [OK] %%v
 
 REM ------------------------------------------------------------
-REM Ð£ï¿½ï¿½ Python ï¿½æ±¾ï¿½Ç²ï¿½ï¿½ï¿½ 3.10 / 3.11 / 3.12
+REM Ð£Ñé Python °æ±¾ÊÇ²»ÊÇ 3.10 / 3.11 / 3.12
 REM ------------------------------------------------------------
-echo [DEBUG] Ð£ï¿½ï¿½ Python ï¿½æ±¾ï¿½ï¿½...
+echo [DEBUG] Ð£Ñé Python °æ±¾ºÅ...
 for /f "tokens=2" %%v in ('python --version 2^>^&1') do set PY_VER=%%v
 for /f "tokens=1,2 delims=." %%a in ("!PY_VER!") do (
     set PY_MAJOR=%%a
@@ -41,7 +41,7 @@ for /f "tokens=1,2 delims=." %%a in ("!PY_VER!") do (
 )
 echo [DEBUG] PY_MAJOR=!PY_MAJOR!, PY_MINOR=!PY_MINOR!
 
-REM Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+REM Ð£Ñé½âÎö½á¹ûÊÇ²»ÊÇÊý×Ö
 echo !PY_MAJOR!| findstr /R "^[0-9][0-9]*$" >nul
 if errorlevel 1 goto :py_parse_failed
 echo !PY_MINOR!| findstr /R "^[0-9][0-9]*$" >nul
@@ -50,42 +50,43 @@ if errorlevel 1 goto :py_parse_failed
 if !PY_MAJOR! NEQ 3 goto :py_wrong_major
 if !PY_MINOR! LSS 10 goto :py_too_old
 if !PY_MINOR! GTR 12 goto :py_too_new
-echo [OK] Python !PY_VER! ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
+echo [OK] Python !PY_VER! °æ±¾·ûºÏÒªÇó
 goto :step1_node
 
 :py_parse_failed
-echo [WARN] Python ï¿½æ±¾ï¿½Å½ï¿½ï¿½ï¿½ï¿½ì³£ (PY_VER=!PY_VER!), ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½
+echo [WARN] Python °æ±¾ºÅ½âÎöÒì³£ (PY_VER=!PY_VER!), Ìø¹ýÐ£Ñé¼ÌÐø
 goto :step1_node
 
 :py_wrong_major
-echo [ERROR] ï¿½ï¿½Ç° Python ï¿½ï¿½ !PY_VER!, ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Òª Python 3.x
+echo [ERROR] µ±Ç° Python ÊÇ !PY_VER!, ±¾ÏîÄ¿ÐèÒª Python 3.x
 pause
 exit /b 1
 
 :py_too_old
-echo [ERROR] Python !PY_VER! Ì«ï¿½ï¿½
-echo         ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Òª Python 3.10 / 3.11 / 3.12
-echo         ï¿½Æ¼ï¿½ Python 3.11.9
-echo         ï¿½ï¿½ï¿½ï¿½: https://www.python.org/downloads/
+echo [ERROR] Python !PY_VER! Ì«¾É
+echo         ±¾ÏîÄ¿ÐèÒª Python 3.10 / 3.11 / 3.12
+echo         ÍÆ¼ö Python 3.11.9
+echo         ÏÂÔØ: https://www.python.org/downloads/
 pause
 exit /b 1
 
 :py_too_new
 echo.
-echo [WARN] Python !PY_VER! ï¿½ï¿½ï¿½ï¿½
-echo        ultralytics / YOLO ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ Python 3.13+
-echo        ï¿½Æ¼ï¿½ï¿½æ±¾: Python 3.11.9
+echo [WARN] Python !PY_VER! ½ÏÐÂ
+echo        ultralytics / YOLO ¿ÉÄÜÎ´ÊÊÅä Python 3.13+
+echo        ÍÆ¼ö°æ±¾: Python 3.11.9
 echo.
-echo ï¿½Ç·ï¿½ï¿½ï¿½ï¿½? (Y ï¿½ï¿½ï¿½ï¿½ / N ï¿½Ë³ï¿½, Ä¬ï¿½ï¿½ N)
-set /p PY_CONFIRM="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Y/N): "
+echo ÊÇ·ñ¼ÌÐø? (Y ¼ÌÐø / N ÍË³ö, Ä¬ÈÏ N)
+set /p PY_CONFIRM="ÇëÊäÈë (Y/N): "
 if /i "!PY_CONFIRM!"=="Y" goto :step1_node
-echo [ABORT] ï¿½ï¿½ï¿½Ë³ï¿½, ï¿½ï¿½ï¿½é°²×° Python 3.11.9
+echo [ABORT] ÒÑÍË³ö, ½¨Òé°²×° Python 3.11.9
 pause
 exit /b 1
 
 :no_python
-echo [ERROR] Ã»ï¿½Òµï¿½ Python, ï¿½ï¿½ï¿½ï¿½×° Python 3.10 / 3.11 / 3.12
-echo         ï¿½Æ¼ï¿½ Python 3.11.9
+echo [ERROR] Ã»ÕÒµ½ Python, ÇëÏÈ×° Python 3.10 / 3.11 / 3.12
+echo         ÍÆ¼ö Python 3.11.9
+echo         https://www.python.org/downloads/
 echo         https://www.python.org/downloads/
 echo.
 echo [INFO] Opening Python download page...
@@ -99,7 +100,7 @@ exit /b 1
 
 :find_python
 echo [INFO] Python not on PATH, searching...
-py -3 --version >nul 2>&1
+py -3 --version >/dev/null 2>&1
 if not errorlevel 1 (
     for /f "tokens=*" %%p in ('py -3 -c "import sys; print(sys.executable)"') do set "FULL_PY=%%p"
     if exist "!FULL_PY!" (
@@ -134,10 +135,11 @@ echo [INFO] Could not find Python automatically
 goto :no_python
 
 :step1_node
+:step1_node
 REM ------------------------------------------------------------
-REM Step 1 ï¿½ï¿½: ï¿½ï¿½ï¿½ Node.js
+REM Step 1 Ðø: ¼ì²é Node.js
 REM ------------------------------------------------------------
-echo [DEBUG] ï¿½ï¿½ï¿½ Node.js...
+echo [DEBUG] ¼ì²é Node.js...
 set NODE_AVAILABLE=0
 node --version >nul 2>&1
 if errorlevel 1 goto :no_node
@@ -147,44 +149,44 @@ set NODE_AVAILABLE=1
 goto :step2
 
 :no_node
-echo [WARN] Ã»ï¿½Òµï¿½ Node.js, ï¿½Ù·ï¿½ï¿½ï¿½Ë½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ (Mock Ä£Ê½ï¿½Éºï¿½ï¿½ï¿½)
+echo [WARN] Ã»ÕÒµ½ Node.js, ¹Ù·½ºó¶Ë½«ÎÞ·¨ÔËÐÐ (Mock Ä£Ê½¿ÉºöÂÔ)
 echo        https://nodejs.org/
 echo [INFO] Opening Node.js download page...
 start https://nodejs.org/
 goto :step2
 
 REM ============================================================
-REM Step 2/6: ï¿½ï¿½ï¿½ï¿½ pip
+REM Step 2/6: Éý¼¶ pip
 REM ============================================================
 :step2
 echo.
-echo [Step 2/6] ï¿½ï¿½ï¿½ï¿½ pip...
+echo [Step 2/6] Éý¼¶ pip...
 python -m pip install --upgrade pip
-if errorlevel 1 echo [WARN] pip ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½
+if errorlevel 1 echo [WARN] pip Éý¼¶Ê§°Ü, ¼ÌÐø
 
 REM ============================================================
-REM Step 3/6: ï¿½ï¿½ï¿½ CUDA ï¿½ï¿½ï¿½ï¿½×° PyTorch (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½)
+REM Step 3/6: ¼ì²â CUDA ²¢°²×° PyTorch (º¬½âÎöÐ£Ñé)
 REM ============================================================
 echo.
-echo [Step 3/6] ï¿½ï¿½ï¿½ CUDA ï¿½ï¿½ï¿½ï¿½×° PyTorch...
+echo [Step 3/6] ¼ì²â CUDA ²¢°²×° PyTorch...
 
 set CUDA_VER=
 set TORCH_INDEX=
 set TORCH_TAG=
 
-echo [DEBUG] ï¿½ï¿½ï¿½ï¿½ nvidia-smi ï¿½ï¿½ï¿½ N ï¿½ï¿½...
+echo [DEBUG] µ÷ÓÃ nvidia-smi ¼ì²â N ¿¨...
 nvidia-smi >nul 2>&1
 if errorlevel 1 goto :no_nvidia
-echo [OK] ï¿½ï¿½âµ½ NVIDIA ï¿½Ô¿ï¿½
+echo [OK] ¼ì²âµ½ NVIDIA ÏÔ¿¨
 
-REM ï¿½ï¿½È¡ CUDA ï¿½æ±¾
-echo [DEBUG] ï¿½ï¿½ï¿½ï¿½ CUDA ï¿½æ±¾ï¿½ï¿½...
+REM ÌáÈ¡ CUDA °æ±¾
+echo [DEBUG] ½âÎö CUDA °æ±¾ºÅ...
 for /f "tokens=9" %%i in ('nvidia-smi ^| findstr /C:"CUDA Version"') do set CUDA_VER=%%i
 
 if "!CUDA_VER!"=="" goto :cuda_parse_failed
-echo [OK] ï¿½ï¿½ï¿½ï¿½Ö§ï¿½ï¿½ CUDA ï¿½ï¿½ß°æ±¾: !CUDA_VER!
+echo [OK] Çý¶¯Ö§³Ö CUDA ×î¸ß°æ±¾: !CUDA_VER!
 
-REM ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î°æ±¾
+REM ²ð·ÖÖ÷´Î°æ±¾
 for /f "tokens=1,2 delims=." %%a in ("!CUDA_VER!") do (
     set CUDA_MAJOR=%%a
     set CUDA_MINOR=%%b
@@ -192,14 +194,14 @@ for /f "tokens=1,2 delims=." %%a in ("!CUDA_VER!") do (
 echo [DEBUG] CUDA_MAJOR=!CUDA_MAJOR!, CUDA_MINOR=!CUDA_MINOR!
 
 REM ------------------------------------------------------------
-REM Ð£ï¿½ï¿½ CUDA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ö¹ nvidia-smi ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ì³£
+REM Ð£Ñé CUDA ½âÎö½á¹ûÊÇ²»ÊÇÊý×Ö, ·ÀÖ¹ nvidia-smi Êä³ö¸ñÊ½Òì³£
 REM ------------------------------------------------------------
 echo !CUDA_MAJOR!| findstr /R "^[0-9][0-9]*$" >nul
 if errorlevel 1 goto :cuda_format_unexpected
 echo !CUDA_MINOR!| findstr /R "^[0-9][0-9]*$" >nul
 if errorlevel 1 goto :cuda_format_unexpected
 
-REM ï¿½æ±¾Ó³ï¿½ï¿½
+REM °æ±¾Ó³Éä
 if !CUDA_MAJOR! GEQ 13 goto :map_cu126
 if !CUDA_MAJOR! EQU 12 goto :map_cuda12
 if !CUDA_MAJOR! EQU 11 goto :map_cu118
@@ -231,20 +233,20 @@ set TORCH_TAG=cu118
 goto :step3_install
 
 :map_cu118_too_old
-echo [WARN] CUDA ï¿½æ±¾Ì«ï¿½ï¿½ (!CUDA_VER!), Ä¬ï¿½ï¿½ï¿½ï¿½ cu118
+echo [WARN] CUDA °æ±¾Ì«µÍ (!CUDA_VER!), Ä¬ÈÏÓÃ cu118
 set TORCH_INDEX=https://download.pytorch.org/whl/cu118
 set TORCH_TAG=cu118
 goto :step3_install
 
 :cuda_format_unexpected
-echo [WARN] CUDA ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ì³£ (MAJOR=!CUDA_MAJOR!, MINOR=!CUDA_MINOR!)
-echo        nvidia-smi ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü²ï¿½ï¿½Ç±ï¿½×¼ï¿½ï¿½Ê½, Ä¬ï¿½ï¿½ï¿½ï¿½ cu121 ï¿½ï¿½ï¿½ï¿½
+echo [WARN] CUDA °æ±¾½âÎö¸ñÊ½Òì³£ (MAJOR=!CUDA_MAJOR!, MINOR=!CUDA_MINOR!)
+echo        nvidia-smi Êä³ö¿ÉÄÜ²»ÊÇ±ê×¼¸ñÊ½, Ä¬ÈÏÓÃ cu121 ¶µµ×
 set TORCH_INDEX=https://download.pytorch.org/whl/cu121
 set TORCH_TAG=cu121
 goto :step3_install
 
 :cuda_parse_failed
-echo [WARN] ï¿½ï¿½ï¿½ï¿½ CUDA ï¿½æ±¾Ê§ï¿½ï¿½ (CUDA_VER Îªï¿½ï¿½), Ä¬ï¿½ï¿½ï¿½ï¿½ cu121
+echo [WARN] ½âÎö CUDA °æ±¾Ê§°Ü (CUDA_VER Îª¿Õ), Ä¬ÈÏÓÃ cu121
 set TORCH_INDEX=https://download.pytorch.org/whl/cu121
 set TORCH_TAG=cu121
 goto :step3_install
@@ -252,48 +254,48 @@ goto :step3_install
 :no_nvidia
 echo.
 echo ============================================================
-echo [WARN] Ã»ï¿½Òµï¿½ nvidia-smi
+echo [WARN] Ã»ÕÒµ½ nvidia-smi
 echo ============================================================
 echo.
-echo ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½:
-echo   1. ï¿½ã²»ï¿½ï¿½ N ï¿½ï¿½ï¿½Ã»ï¿½ (A ï¿½ï¿½ / ï¿½ï¿½ï¿½ï¿½ / Mac / ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
-echo   2. N ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ã»×° NVIDIA ï¿½ï¿½ï¿½ï¿½
-echo   3. ×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ PATH Ã»ï¿½ï¿½Ð§ (ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+echo ¿ÉÄÜÔ­Òò:
+echo   1. Äã²»ÊÇ N ¿¨ÓÃ»§ (A ¿¨ / ¼¯ÏÔ / Mac / ÔÆÖ÷»ú)
+echo   2. N ¿¨ÓÃ»§µ«»¹Ã»×° NVIDIA Çý¶¯
+echo   3. ×°ÁËÇý¶¯µ« PATH Ã»ÉúÐ§ (ÖØÆôÒ»ÏÂÊÔÊÔ)
 echo.
-echo ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½:
-echo   - ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ GPU ï¿½ï¿½ YOLO ÊµÊ±Ê¶ï¿½ï¿½
-echo   - CPU ï¿½ï¿½ï¿½ï¿½ FPS ï¿½ï¿½ï¿½ 30 ï¿½ï¿½ï¿½ï¿½ 2 ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½ÊµÕ½
-echo   - Ç¿ï¿½Ò½ï¿½ï¿½ï¿½ï¿½ï¿½È¥×° NVIDIA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü±ï¿½ï¿½Å±ï¿½:
+echo ÖØÒªÌáÐÑ:
+echo   - ±¾ÏîÄ¿ÒÀÀµ GPU ÅÜ YOLO ÊµÊ±Ê¶±ð
+echo   - CPU °æÏÂ FPS »á´Ó 30 µôµ½ 2 ÒÔÏÂ, »ù±¾ÎÞ·¨ÊµÕ½
+echo   - Ç¿ÁÒ½¨ÒéÏÈÈ¥×° NVIDIA Çý¶¯ÔÙÖØÅÜ±¾½Å±¾:
 echo     https://www.nvidia.com/Download/index.aspx
 echo.
-echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½:
-echo   [1] ï¿½Ë³ï¿½ï¿½Å±ï¿½, ï¿½ï¿½È¥×°ï¿½ï¿½ï¿½ï¿½ (ï¿½Æ¼ï¿½)
-echo   [2] ï¿½ï¿½ï¿½ï¿½×° CPU ï¿½ï¿½ PyTorch (Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ / Mock Ä£Ê½)
-echo   [3] ï¿½Ë³ï¿½ï¿½Å±ï¿½, ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ PYTORCH_INSTALL.md ï¿½Ö¶ï¿½×°
+echo ÄãÓÐÈý¸öÑ¡Ôñ:
+echo   [1] ÍË³ö½Å±¾, ÏÈÈ¥×°Çý¶¯ (ÍÆ¼ö)
+echo   [2] ¼ÌÐø×° CPU °æ PyTorch (Ö»ÓÃÀ´¿ª·¢µ÷ÊÔ / Mock Ä£Ê½)
+echo   [3] ÍË³ö½Å±¾, ÎÒ×Ô¼º¿´ PYTORCH_INSTALL.md ÊÖ¶¯×°
 echo.
-set /p CPU_CHOICE="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1 / 2 / 3 (Ä¬ï¿½ï¿½ 1): "
+set /p CPU_CHOICE="ÇëÊäÈë 1 / 2 / 3 (Ä¬ÈÏ 1): "
 if "!CPU_CHOICE!"=="" set CPU_CHOICE=1
 if "!CPU_CHOICE!"=="1" goto :abort_no_gpu
 if "!CPU_CHOICE!"=="3" goto :abort_manual
 if "!CPU_CHOICE!"=="2" goto :install_cpu
-echo [ABORT] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ (Ö»ï¿½ï¿½ï¿½ï¿½ 1/2/3), ï¿½ï¿½ï¿½Ë³ï¿½
+echo [ABORT] ÊäÈëÎÞÐ§ (Ö»ÄÜÊÇ 1/2/3), ÒÑÍË³ö
 pause
 exit /b 1
 
 :abort_no_gpu
-echo [ABORT] ï¿½ï¿½ï¿½Ë³ï¿½, ×°ï¿½ï¿½ NVIDIA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ install.bat
+echo [ABORT] ÒÑÍË³ö, ×°ºÃ NVIDIA Çý¶¯ºóÖØÐÂÅÜ install.bat
 pause
 exit /b 1
 
 :abort_manual
-echo [ABORT] ï¿½ï¿½ï¿½Ë³ï¿½, ï¿½ï¿½Î¿ï¿½ PYTORCH_INSTALL.md ï¿½Ö¶ï¿½ï¿½ï¿½×°
+echo [ABORT] ÒÑÍË³ö, Çë²Î¿¼ PYTORCH_INSTALL.md ÊÖ¶¯°²×°
 pause
 exit /b 1
 
 :install_cpu
 echo.
-echo [INFO] ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ [2] ×° CPU ï¿½ï¿½
-echo        ï¿½ï¿½ï¿½Ú°ï¿½×° CPU ï¿½ï¿½ PyTorch...
+echo [INFO] ÄãÑ¡ÔñÁË [2] ×° CPU °æ
+echo        ÕýÔÚ°²×° CPU °æ PyTorch...
 python -m pip install torch torchvision torchaudio
 if errorlevel 1 goto :torch_install_failed
 set TORCH_TAG=cpu
@@ -301,99 +303,95 @@ goto :step3_done
 
 :step3_install
 echo.
-echo [INFO] ï¿½ï¿½ï¿½ï¿½×° PyTorch !TORCH_TAG! ï¿½æ±¾
-echo [INFO] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·: !TORCH_INDEX!
+echo [INFO] ½«°²×° PyTorch !TORCH_TAG! °æ±¾
+echo [INFO] Ë÷ÒýµØÖ·: !TORCH_INDEX!
 echo.
 python -m pip install torch torchvision torchaudio --index-url !TORCH_INDEX! --default-timeout 120
-if not errorlevel 1 goto :step3_done
-echo.
-echo [WARN] First attempt failed, retrying once...
-python -m pip install torch torchvision torchaudio --index-url !TORCH_INDEX! --default-timeout 120
-if not errorlevel 1 goto :step3_done
-goto :torch_install_failed
+if errorlevel 1 goto :torch_install_failed
+goto :step3_done
 
 :torch_install_failed
 echo.
-echo [ERROR] PyTorch ï¿½ï¿½×°Ê§ï¿½ï¿½
-echo         ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½:
-echo         1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (PyTorch ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¹ï¿½ï¿½Ú¾ï¿½ï¿½ï¿½)
-echo         2. CUDA ï¿½æ±¾ï¿½ï¿½Æ¥ï¿½ï¿½
-echo         ï¿½ï¿½Î¿ï¿½ PYTORCH_INSTALL.md ï¿½Ö¶ï¿½ï¿½ï¿½×°
+echo [ERROR] PyTorch °²×°Ê§°Ü
+echo         ¿ÉÄÜÔ­Òò:
+echo         1. ÍøÂçÎÊÌâ (PyTorch Ë÷Òý²»ÄÜÓÃ¹úÄÚ¾µÏñ)
+echo         2. CUDA °æ±¾²»Æ¥Åä
+echo         Çë²Î¿¼ PYTORCH_INSTALL.md ÊÖ¶¯°²×°
 pause
 exit /b 1
 
 :step3_done
 echo.
-echo [INFO] ï¿½ï¿½Ö¤ PyTorch ï¿½ï¿½×° (ï¿½ï¿½Ç©: !TORCH_TAG!)...
+echo [INFO] ÑéÖ¤ PyTorch °²×° (±êÇ©: !TORCH_TAG!)...
 python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('GPU:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU mode')"
 if errorlevel 1 goto :torch_import_failed
 goto :step4
 
 :torch_import_failed
-echo [ERROR] PyTorch import Ê§ï¿½ï¿½
+echo [ERROR] PyTorch import Ê§°Ü
 pause
 exit /b 1
 
 REM ============================================================
-REM Step 4/6: ï¿½ï¿½×° requirements.txt
+REM Step 4/6: °²×° requirements.txt
 REM ============================================================
 :step4
 echo.
-echo [Step 4/6] ï¿½ï¿½×° Python ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½...
+echo [Step 4/6] °²×° Python ÆäÓàÒÀÀµ...
 if not exist "requirements.txt" goto :no_requirements
 
 python -m pip install -r requirements.txt
 if errorlevel 1 goto :req_install_failed
-echo [OK] Python ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½
+echo [OK] Python ÒÀÀµ°²×°Íê³É
 goto :step5
 
 :no_requirements
-echo [ERROR] ï¿½Ò²ï¿½ï¿½ï¿½ requirements.txt
+echo [ERROR] ÕÒ²»µ½ requirements.txt
 pause
 exit /b 1
 
 :req_install_failed
-echo [ERROR] requirements.txt ï¿½ï¿½×°Ê§ï¿½ï¿½
-echo         ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ pip ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:
+echo [ERROR] requirements.txt °²×°Ê§°Ü
+echo         ³¢ÊÔÇÐ»» pip ¾µÏñÔ´ºóÖØÊÔ:
 echo         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 pause
 exit /b 1
 
 REM ============================================================
-REM Step 5/6: Node.js ï¿½ï¿½ï¿½ï¿½ (ï¿½Ù·ï¿½ï¿½ï¿½ï¿½)
-REM Êµï¿½ï¿½Â·ï¿½ï¿½: official_v2\socket\v2\backend
+REM Step 5/6: Node.js ÒÀÀµ (¹Ù·½ºó¶Ë)
+REM Êµ¼ÊÂ·¾¶: official_v2\socket\v2\backend
 REM ============================================================
 :step5
 echo.
-echo [Step 5/6] ï¿½ï¿½×° Node.js ï¿½ï¿½ï¿½ï¿½ (ï¿½Ù·ï¿½ï¿½ï¿½ï¿½)...
+echo [Step 5/6] °²×° Node.js ÒÀÀµ (¹Ù·½ºó¶Ë)...
 if "!NODE_AVAILABLE!"=="0" goto :step5_skip_no_node
 
 set BACKEND_DIR=official_v2\socket\v2\backend
 if not exist "!BACKEND_DIR!" goto :step5_skip_no_dir
 if not exist "!BACKEND_DIR!\package.json" goto :step5_skip_no_pkg
 
-echo [INFO] ï¿½ï¿½ï¿½ï¿½Ù·ï¿½ï¿½ï¿½ï¿½Ä¿Â¼: !BACKEND_DIR!
+echo [INFO] ½øÈë¹Ù·½ºó¶ËÄ¿Â¼: !BACKEND_DIR!
 pushd "!BACKEND_DIR!"
 call npm install
 if errorlevel 1 goto :npm_failed
 
-echo [OK] Node ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ (ï¿½Ù·ï¿½ï¿½ï¿½ï¿½)
+echo [OK] Node ÒÀÀµ°²×°Íê³É (¹Ù·½ºó¶Ë)
 
+REM ×Ô¶¯¸´ÖÆ .env (Ê×´Î°²×°)
 :step5_env_check
-REM ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ .env (ï¿½×´Î°ï¿½×°)
 if exist ".env" goto :env_exists
 if not exist ".env.example" goto :no_env_example
 copy /Y ".env.example" ".env" >nul
-echo [OK] ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ .env (ï¿½ï¿½ .env.example ï¿½ï¿½ï¿½ï¿½)
-echo      Ä¬ï¿½Ï¶Ë¿ï¿½ 9999, ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½ï¿½ï¿½à¼­ .env
+echo [OK] ÒÑ×Ô¶¯´´½¨ .env (´Ó .env.example ¸´ÖÆ)
+echo      Ä¬ÈÏ¶Ë¿Ú 9999, ÈçÐèÐÞ¸ÄÇë±à¼­ .env
 goto :env_done
 
 :env_exists
-echo [INFO] .env ï¿½Ñ´ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+echo [INFO] .env ÒÑ´æÔÚ, Ìø¹ý¸´ÖÆ
 goto :env_done
 
 :no_env_example
-echo [WARN] Ã»ï¿½Òµï¿½ .env.example, ï¿½ï¿½ï¿½Ö¶ï¿½ï¿½ï¿½é»·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+echo [WARN] Ã»ÕÒµ½ .env.example, ÇëÊÖ¶¯¼ì²é»·¾³±äÁ¿ÅäÖÃ
 goto :env_done
 
 :env_done
@@ -417,50 +415,34 @@ echo [WARN] npm install still failed
 echo        Mock mode can skip this, continue anyway...
 pause >nul
 goto :step6
-
-:step5_skip_no_node
-echo [SKIP] Ã»×° Node.js, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ (Mock Ä£Ê½ï¿½Éºï¿½ï¿½ï¿½)
-goto :step6
-
-:step5_skip_no_dir
-echo [WARN] Î´ï¿½Òµï¿½ï¿½Ù·ï¿½ï¿½ï¿½ï¿½Ä¿Â¼: !BACKEND_DIR! (Mock Ä£Ê½ï¿½Éºï¿½ï¿½ï¿½)
-goto :step6
-
-:step5_skip_no_pkg
-echo [WARN] ï¿½ï¿½ï¿½Ä¿Â¼ï¿½ï¿½Ã»ï¿½ï¿½ package.json, ï¿½ï¿½ï¿½ï¿½Ù·ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹
-goto :step6
-
-REM ============================================================
-REM Step 6/6: ï¿½ï¿½ check_deps.py ï¿½ï¿½Ö¤
-REM ============================================================
 :step6
 echo.
-echo [Step 6/6] ï¿½ï¿½Ö¤ï¿½ï¿½×°...
+echo [Step 6/6] ÑéÖ¤°²×°...
 if not exist "check_deps.py" goto :no_check_deps
 
 python check_deps.py
-if errorlevel 1 echo [WARN] check_deps.py ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+if errorlevel 1 echo [WARN] check_deps.py ±¨¸æÓÐÎÊÌâ, ¼ûÉÏÎÄ
 goto :done
 
 :no_check_deps
-echo [WARN] ï¿½Ò²ï¿½ï¿½ï¿½ check_deps.py, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤
+echo [WARN] ÕÒ²»µ½ check_deps.py, Ìø¹ýÑéÖ¤
 goto :done
 
 REM ============================================================
-REM ï¿½ï¿½ï¿½
+REM Íê³É
 REM ============================================================
 :done
 echo.
 echo ============================================================
-echo   ï¿½ï¿½×°ï¿½ï¿½ï¿½!
+echo   °²×°Íê³É!
 echo ============================================================
 echo.
-echo ï¿½ï¿½Ò»ï¿½ï¿½:
-echo   1. ï¿½ï¿½ï¿½Ä£Ê½: Ë«ï¿½ï¿½ start_all.bat
-echo   2. Mock Ä£Ê½: ï¿½ï¿½ README.md
+echo ÏÂÒ»²½:
+echo   1. Õæ»úÄ£Ê½: Ë«»÷ start_all.bat
+echo   2. Mock Ä£Ê½: ¼û README.md
 echo.
-echo Ç¿ï¿½Èµï¿½ï¿½ï¿½: ï¿½à¼­ config.ini
-echo PyTorch ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ PYTORCH_INSTALL.md
+echo Ç¿¶Èµ÷Õû: ±à¼­ config.ini
+echo PyTorch ÎÊÌâ: ¼û PYTORCH_INSTALL.md
 echo.
 pause
 endlocal
