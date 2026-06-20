@@ -8,6 +8,25 @@ set "TRIGGER=%ROOT%python_trigger"
 set "VISION=%ROOT%vision"
 set "NMOD=node_modules"
 
+REM ---- Auto-locate Python (same logic as install.bat :find_python) ----
+set "PYEXE="
+for /f "delims=" %%p in ('py -3 -c "import sys;print(sys.executable)" 2^>nul') do set "PYEXE=%%p"
+if not defined PYEXE for /f "delims=" %%p in ('python -c "import sys;print(sys.executable)" 2^>nul') do set "PYEXE=%%p"
+if not defined PYEXE for /d %%d in ("%LOCALAPPDATA%\Programs\Python\Python3*") do if exist "%%d\python.exe" set "PYEXE=%%d\python.exe"
+if not defined PYEXE for /d %%d in ("C:\Python3*") do if exist "%%d\python.exe" set "PYEXE=%%d\python.exe"
+
+if not defined PYEXE (
+    echo [ERROR] Python not found, install from python.org first.
+    pause
+    exit /b 1
+)
+
+for %%f in ("%PYEXE%") do set "PYDIR=%%~dpf"
+if "%PYDIR:~-1%"=="\" set "PYDIR=%PYDIR:~0,-1%"
+set "PATH=%PYDIR%;%PYDIR%\Scripts;%PATH%"
+echo [OK] Python found: %PYEXE%
+echo.
+
 echo Project root: %ROOT%
 echo Backend path: %BACKEND%
 echo Trigger path: %TRIGGER%
@@ -139,7 +158,7 @@ set "DGLAB_LAN_IP=%LAN_IP%"
 set "SQUAD_SUPPRESSION_MODE=%SUPP_MODE%"
 
 echo [2/3] Starting Trigger (DGLAB_REAL=%DGLAB_REAL%, DGLAB_LAN_IP=%DGLAB_LAN_IP%)...
-start "Trigger Service" cmd /k "cd /d %TRIGGER% && uvicorn app:app --host 127.0.0.1 --port 18000"
+start "Trigger Service" cmd /k "cd /d %TRIGGER% && python -m uvicorn app:app --host 127.0.0.1 --port 18000"
 
 timeout /t 4 /nobreak > nul
 

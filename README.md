@@ -7,7 +7,7 @@ v1.0.0 在 v0.2.0-alpha 基础上完成了一键安装、依赖体检、配置�
 ## 当前版本
 
 ```txt
-v1.0.1
+v1.0.3
 ```
 
 发布形式：
@@ -231,7 +231,7 @@ cd /d "项目根目录"
 python check_deps.py
 ```
 
-应看到 5 节检查全部通过：Python 版本 / 13 个依赖包 / PyTorch+CUDA / OpenCV 功能 / 项目文件完整性。
+应看到 7 节检查全部通过：Python 版本 / 13 个依赖包 / PyTorch+CUDA / OpenCV 功能 / 项目文件完整性 / 端口占用检查 / config.ini 配置校验。
 
 ---
 
@@ -318,11 +318,11 @@ cd /d "项目根目录\python_trigger"
 
 REM Mock 模式
 set DGLAB_REAL=0
-uvicorn app:app --host 127.0.0.1 --port 18000
+python -m uvicorn app:app --host 127.0.0.1 --port 18000
 
 REM 真实 DG-LAB 模式
 set DGLAB_REAL=1
-uvicorn app:app --host 127.0.0.1 --port 18000
+python -m uvicorn app:app --host 127.0.0.1 --port 18000
 ```
 
 ### 4. 启动 vision 视觉识别脚本
