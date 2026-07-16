@@ -1,0 +1,17 @@
+# ============================================================
+# SQUAD DG-LAB DGHUB Plugin 依赖清单
+# ============================================================
+# 安装: pip install -r requirements.txt
+# PyTorch GPU 版请单独安装:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+# ============================================================
+
+# ---------- vision 实时识别层 ----------
+torch                   # YOLO 推理引擎
+ultralytics             # YOLOv8 模型
+opencv-python           # 图像处理与预览窗口
+mss                     # 屏幕实时截图
+numpy                   # 数组运算
+
+# ---------- DGHUB 通信层 ----------
+websockets              # DGHUB WebSocket 客户端

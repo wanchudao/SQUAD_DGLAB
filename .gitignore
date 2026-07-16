@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# 日志
+*.log
+
+# 构建产物 — 仅通过 GitHub Release assets 分发
+squad_dglab.zip
+
+# 本地临时目录
+_tmp_*/
+_temp_*/
+
+# 个人 AI 工具链（含 API 密钥 — 严禁提交）
+.claude/
+proxy_router.py
+code_with_proxy.bat
+start_deepseek.bat
+start_longcat.bat
+start_router.bat
+
+# 独立应用遗留资产（已发布于本仓库 main 分支）
+python_trigger/
+official_v2/
+samples/
+test_minimal/
+test_minimal.zip
+config.ini
+check_deps.py
+install.bat
+start_all.bat
+node_modules/
+
+# 内部文档
+docs/
+PLAN_DEBUG_v2.md
+KNOWN_ISSUES.md
+PYTORCH_INSTALL.md
+PLUGIN_DEVELOPMENT.md
+.github/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
