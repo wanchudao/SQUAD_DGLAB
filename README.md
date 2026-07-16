@@ -1,5 +1,8 @@
 # SQUAD × DG-LAB
 
+> 🔌 **DGHub 插件版已发布！** 无需本项目的三进程架构，在 DGHub 中导入 zip 即用
+> → [插件分支](../../tree/dghub-plugin) ｜ [下载 dghub-v1.0.0](../../releases/tag/dghub-v1.0.0)
+
 SQUAD × DG-LAB 是一个把 SQUAD 游戏画面中的角色状态识别结果，通过本地 Python Trigger 服务转发到 DG-LAB SOCKET v2 通信层，实现基于视觉识别的外部设备反馈的项目。
 
 v1.0.0 在 v0.2.0-alpha 基础上完成了一键安装、依赖体检、配置化强度调整等封装工作，核心事件（bleeding / incap / death / safe stop）已通过真机验证，可作为正式版本对外发布。
@@ -15,7 +18,7 @@ v1.0.3
 - **A 版（源码 + 模型）​**：适合开发者、想魔改的用户。
 - **B 版（源码 + 依赖 + 模型）​**：解压即用，含预装的 venv 和 node_modules。
 
-DGHub 插件版将作为独立 release 在 v1.1 推出。
+DGHub 插件版已发布，见本仓库 [dghub-plugin 分支](../../tree/dghub-plugin)。
 
 ---
 
